@@ -80,6 +80,12 @@ Round-robin, 10 games per pair, swapping who moves first.
 
 ![tournament](experiments/results/plots/tournament.png)
 
+![game lengths](experiments/results/plots/game_lengths.png)
+
+Games get longer as both players get stronger. When neither side places walls (Greedy vs Easy),
+every game is the same 14-move race. Medium vs Hard averages 63 moves: both sides spend their
+walls and the board turns into a maze.
+
 Strength follows search depth. Look-ahead is also what makes walls useful: Greedy never places
 walls, while Medium used 3.9 per game and Hard 8.0. A wall costs a move but can add several steps
 to the opponent's route, and only a search can see that trade.

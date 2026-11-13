@@ -160,6 +160,32 @@ def plot_tournament():
     plt.close(fig)
 
 
+def plot_game_lengths():
+    """Box plot of how long games last (in plies) for each pairing."""
+    rows = read("tournament.csv")
+    order = ["Random", "Greedy", "Easy", "Medium", "Hard"]
+    by_pair = defaultdict(list)
+    for r in rows:
+        a, b = sorted([r["first"], r["second"]], key=order.index)
+        by_pair["%s vs\n%s" % (a, b)].append(int(r["plies"]))
+    labels = sorted(by_pair, key=lambda k: sum(by_pair[k]) / len(by_pair[k]))
+    data = [by_pair[k] for k in labels]
+
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+    box = ax.boxplot(data, patch_artist=True, widths=0.6)
+    for patch in box["boxes"]:
+        patch.set_facecolor("#4CC9F0")
+        patch.set_alpha(0.6)
+    for median in box["medians"]:
+        median.set_color("#0F1115")
+    ax.set_xticks(range(1, len(labels) + 1), labels, fontsize=8)
+    style(ax, "Game length per pairing (10 games each, sorted by average)",
+          "", "Moves in the game (plies)")
+    fig.tight_layout()
+    fig.savefig(os.path.join(PLOTS, "game_lengths.png"), dpi=150)
+    plt.close(fig)
+
+
 def main():
     os.makedirs(PLOTS, exist_ok=True)
     plot_nodes()
@@ -168,6 +194,7 @@ def main():
     plot_bfs_astar()
     if os.path.exists(os.path.join(RESULTS, "tournament.csv")):
         plot_tournament()
+        plot_game_lengths()
     print("plots saved to", PLOTS)
 
 
