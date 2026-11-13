@@ -16,13 +16,16 @@ PATH_WEIGHT = 10
 WALL_WEIGHT = 3
 
 
-def evaluate(state, player):
-    """Score of `state` from `player`'s point of view (higher is better)."""
+def evaluate(state, player, wall_weight=WALL_WEIGHT):
+    """Score of `state` from `player`'s point of view (higher is better).
+
+    wall_weight sets how much one wall in hand is worth (see experiments/eval_weights.py).
+    """
     w = state.winner()
     if w is not None:
         return WIN_SCORE if w == player else -WIN_SCORE
     my_dist = pathfinding.distance(state, player)
     opp_dist = pathfinding.distance(state, 1 - player)
     score = PATH_WEIGHT * (opp_dist - my_dist)
-    score += WALL_WEIGHT * (state.walls_left[player] - state.walls_left[1 - player])
+    score += wall_weight * (state.walls_left[player] - state.walls_left[1 - player])
     return score

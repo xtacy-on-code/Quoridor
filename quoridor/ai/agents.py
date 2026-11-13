@@ -15,7 +15,7 @@ import random
 import time
 
 from quoridor import pathfinding
-from quoridor.ai.evaluation import evaluate, WIN_SCORE
+from quoridor.ai.evaluation import evaluate, WIN_SCORE, WALL_WEIGHT
 from quoridor.ai.movegen import candidate_moves
 
 
@@ -84,10 +84,12 @@ class AlphaBetaAgent(Agent):
                     and return the deepest finished answer when time runs out
     mistake_rate  - chance of ignoring the search and playing greedily
                     (used to make the Easy level beatable)
+    wall_weight   - value of one wall in hand in the evaluation function
     """
 
     def __init__(self, depth=2, ordering=True, max_walls=None, time_limit=None,
-                 mistake_rate=0.0, name=None, seed=None, pruning=True):
+                 mistake_rate=0.0, name=None, seed=None, pruning=True,
+                 wall_weight=WALL_WEIGHT):
         super().__init__(seed)
         self.depth = depth
         self.ordering = ordering
@@ -95,6 +97,7 @@ class AlphaBetaAgent(Agent):
         self.time_limit = time_limit
         self.mistake_rate = mistake_rate
         self.pruning = pruning
+        self.wall_weight = wall_weight
         self.name = name or ("AlphaBeta-d%d" % depth if pruning else "Minimax-d%d" % depth)
         self._deadline = None
 
@@ -162,7 +165,7 @@ class AlphaBetaAgent(Agent):
             # the win came sooner, so the winner prefers it.
             return -(WIN_SCORE + depth)
         if depth == 0:
-            return evaluate(state, state.turn)
+            return evaluate(state, state.turn, self.wall_weight)
 
         best = -math.inf
         for move in self._moves(state):

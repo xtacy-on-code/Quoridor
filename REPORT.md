@@ -84,6 +84,20 @@ Strength follows search depth. Look-ahead is also what makes walls useful: Greed
 walls, while Medium used 3.9 per game and Hard 8.0. A wall costs a move but can add several steps
 to the opponent's route, and only a search can see that trade.
 
+### Tuning the evaluation
+
+Is it worth valuing walls kept in hand? Two depth-2 agents that differ only in `wall_weight`
+played 20 games per pairing, swapping who moves first (`python -m experiments.eval_weights`).
+
+| Challenger weight | vs weight 3 (ours) | Walls used per game (challenger / ours) |
+|---|---|---|
+| 0 (walls in hand worth nothing) | 9/20 wins | 9.1 / 9.4 |
+| 10 (a wall worth as much as a step) | 11/20 wins | 7.9 / 9.8 |
+
+Neither change makes a clear difference: 9/20 and 11/20 are within the noise of 20 games.
+A higher weight makes the agent hold on to walls, but the path-length term decides the games.
+So we kept weight 3.
+
 ## 6. Limitations
 
 - Wall pruning misses "setup" walls whose value only shows a few moves later.
