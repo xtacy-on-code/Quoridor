@@ -84,3 +84,23 @@ def test_all_agents_return_legal_moves():
             move = agent.choose_move(s)
             assert s.is_legal(move)
             s.apply(move)
+
+
+def test_bfs_and_astar_on_hand_built_maze():
+    # Player 0 at e1 (row 8, col 4). Three horizontal walls close the groove
+    # above columns 1-6, so the pawn must walk right to column 7 first:
+    # 3 steps right + 8 steps up = 11.
+    s = GameState()
+    s.pawns = [(8, 4), (0, 0)]
+    for c in (1, 3, 5):
+        s.place_wall_temp("h", 7, c)
+
+    bfs_dist, bfs_path, bfs_expanded = pathfinding.bfs(s, 0, return_path=True)
+    astar_dist, astar_path, astar_expanded = pathfinding.astar(s, 0, return_path=True)
+
+    assert bfs_dist == 11
+    assert astar_dist == 11
+    assert bfs_path[0] == (8, 4) and bfs_path[-1][0] == 0
+    assert len(astar_path) == 12
+    # The heuristic guides A* straight to the gap, so it expands far fewer cells.
+    assert astar_expanded <= bfs_expanded
