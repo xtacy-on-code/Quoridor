@@ -114,3 +114,25 @@ def test_winner():
     s = empty_board()
     s.pawns = [(0, 2), (5, 5)]
     assert s.winner() == 0
+
+
+def test_no_jump_when_wall_between_pawns():
+    s = empty_board()
+    s.pawns = [(5, 4), (4, 4)]
+    s.place_wall_temp("h", 4, 4)           # wall between the two pawns
+    moves = s.pawn_moves(0)
+    # no straight jump and no diagonal: the wall stops us before we reach them
+    assert (3, 4) not in moves
+    assert (4, 3) not in moves and (4, 5) not in moves
+    assert sorted(moves) == [(5, 3), (5, 5), (6, 4)]
+
+
+def test_only_one_diagonal_when_side_is_walled():
+    s = empty_board()
+    s.pawns = [(5, 4), (4, 4)]
+    s.place_wall_temp("h", 3, 4)           # wall behind the opponent -> no straight jump
+    s.place_wall_temp("v", 4, 4)           # wall on the opponent's right side
+    moves = s.pawn_moves(0)
+    assert (4, 3) in moves                 # left diagonal still open
+    assert (4, 5) not in moves             # right diagonal blocked
+    assert sorted(moves) == [(4, 3), (5, 3), (6, 4)]
