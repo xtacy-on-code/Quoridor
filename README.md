@@ -1,7 +1,7 @@
 # Quoridor AI
 
 A Quoridor game you can play against an AI, or watch two AIs play each other.
-The AI uses **Alpha-Beta search** to look ahead and **BFS / A\* shortest paths** to judge positions.
+The AI uses **Alpha-Beta search** to look ahead and **A\* shortest paths** to judge positions.
 
 ![Gameplay: Medium AI (Amber) vs Hard AI (Cyan), BFS paths shown](docs/gameplay.png)
 
@@ -56,7 +56,7 @@ Quoridor is played on a 9×9 board. Each player has a pawn and 10 walls.
 | `Space` | Pause / resume (AI vs AI) |
 | `R` / `Esc` | Restart / back to menu |
 
-The side panel shows each player's BFS distance to goal, walls left, the race
+The side panel shows each player's distance to goal, walls left, the race
 advantage, and the AI's last search (depth reached, positions searched, time).
 
 ---
@@ -66,13 +66,15 @@ advantage, and the AI's last search (depth reached, positions searched, time).
 ### 1. Judging a position: shortest paths
 
 Quoridor is a race, so the most important number is **how many steps each player
-still needs**. We get it with **BFS** on the 9×9 grid, treating walls as removed edges.
+still needs**. We first wrote **BFS** on the 9×9 grid, treating walls as removed edges.
 The goal is a whole row, so BFS stops at the first goal-row square it reaches.
-We also implemented **A\*** with `h = rows left to the goal`. That heuristic is admissible and
-consistent (each step changes the row by at most 1), so it finds the same shortest path
-while expanding about **3× fewer squares** than BFS.
+We then added **A\*** with `h = rows left to the goal`. That heuristic is admissible and
+consistent (each step changes the row by at most 1), so it finds the same shortest distance
+while expanding about **3× fewer squares** than BFS (about 2× faster per call).
+The AI and the rules now get every distance from A\*. BFS still draws the paths (`P`) and gives
+the opponent's path that wall pruning cuts (see below).
 
-BFS is also what enforces the "never fully block a player" rule: a wall is legal only if
+The same distance check enforces the "never fully block a player" rule: a wall is legal only if
 both players still have a path after it is placed.
 
 **Evaluation function** (from the point of view of the player we are scoring):
@@ -97,6 +99,7 @@ answer as minimax but skips branches the opponent would never allow.
 | ~120 legal moves per turn (mostly walls). Depth 2 would mean ~14,000 positions. | **Wall pruning:** only try walls that cut the opponent's current shortest path, and keep the ones that actually make it longer. ~120 moves → ~11. |
 | Alpha-beta prunes well only if good moves are searched first. | **Move ordering:** each move gets a quick score (my path shorter / opponent's path longer); search best-first. |
 | Fixed depth is either too slow or too shallow. | **Iterative deepening** (Hard): search depth 1, 2, 3… until the time limit, keep the deepest finished answer. |
+| A deep search can "dodge" the opponent's walls in hand by pacing back and forth, pushing the wall past its horizon while the opponent walks home (Hard vs Hard could loop to the 200-move limit). | **Repeat guard** (Hard): don't step back onto a square used in your last 4 moves unless it shortens your route. |
 
 ### 4. Difficulty levels
 
@@ -104,7 +107,7 @@ answer as minimax but skips branches the opponent would never allow.
 |---|---|
 | Easy | Depth 1, 4 candidate walls, plays a plain greedy move 40% of the time |
 | Medium | Alpha-Beta depth 2, 8 candidate walls |
-| Hard | Alpha-Beta with iterative deepening up to depth 6, 12 candidate walls, 2 s per move (usually reaches depth 4-5) |
+| Hard | Alpha-Beta with iterative deepening up to depth 6, 12 candidate walls, 2 s per move (usually reaches depth 4-5), repeat guard |
 
 The AI runs on a background thread so the window never freezes while it thinks.
 
@@ -114,6 +117,11 @@ The AI runs on a background thread so the window never freezes while it thinks.
 
 Full write-up in [REPORT.md](REPORT.md). Run the experiments yourself with
 `python -m experiments.run_all`.
+
+The numbers below were measured before two later changes: distances from A\* instead of BFS,
+and Hard's repeat guard. A\* gives the same distances, so positions searched and scores are
+unchanged (we re-checked); only the times drop. The repeat guard changes Hard's play, so the
+tournament has not been re-run with it yet (see REPORT.md, section 4).
 
 **Alpha-Beta vs Minimax** (same moves chosen, average over 12 mid-game positions):
 

@@ -120,7 +120,7 @@ class GameState:
 
     def is_legal_wall(self, ori, r, c, player=None):
         """A wall is legal if the player has walls left, it fits, and both
-        players can still reach their goal row afterwards (checked with BFS)."""
+        players can still reach their goal row afterwards (checked with A*)."""
         if player is None:
             player = self.turn
         if self.walls_left[player] <= 0:

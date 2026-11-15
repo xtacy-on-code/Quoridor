@@ -67,6 +67,10 @@ class GreedyAgent(Agent):
         return self.rng.choice(best_moves)
 
 
+REPEAT_MEMORY = 4       # how many of our own last moves avoid_repeats looks back over
+REPEAT_PENALTY = 100    # more than any normal score gap, far less than a win
+
+
 class TimeUp(Exception):
     pass
 
@@ -85,11 +89,14 @@ class AlphaBetaAgent(Agent):
     mistake_rate  - chance of ignoring the search and playing greedily
                     (used to make the Easy level beatable)
     wall_weight   - value of one wall in hand in the evaluation function
+    avoid_repeats - don't step back onto a square this pawn stood on in its
+                    last few moves unless that step shortens its route
+                    (stops Hard from pacing back and forth; see _repeat_penalty)
     """
 
     def __init__(self, depth=2, ordering=True, max_walls=None, time_limit=None,
                  mistake_rate=0.0, name=None, seed=None, pruning=True,
-                 wall_weight=WALL_WEIGHT):
+                 wall_weight=WALL_WEIGHT, avoid_repeats=False):
         super().__init__(seed)
         self.depth = depth
         self.ordering = ordering
@@ -98,6 +105,7 @@ class AlphaBetaAgent(Agent):
         self.mistake_rate = mistake_rate
         self.pruning = pruning
         self.wall_weight = wall_weight
+        self.avoid_repeats = avoid_repeats
         self.name = name or ("AlphaBeta-d%d" % depth if pruning else "Minimax-d%d" % depth)
         self._deadline = None
 
@@ -138,8 +146,37 @@ class AlphaBetaAgent(Agent):
             moves = [("move", r, c) for (r, c) in state.pawn_moves()]
         return moves
 
+    def _recent_squares(self, state):
+        """Squares this player's pawn stood on before its last few pawn moves."""
+        squares = set()
+        own = state.history[-2::-2][:REPEAT_MEMORY]   # this player's own last moves
+        for move, old_pos in own:
+            if move[0] == "move":
+                squares.add(old_pos)
+        return squares
+
+    def _repeat_penalty(self, state, move, recent, my_dist):
+        """Horizon-effect guard, applied at the root only.
+
+        Deep searches can see that the opponent's walls in hand will hurt
+        whichever corridor we commit to, and "dodge" that by pacing back and
+        forth: the wall is pushed past the search horizon while the opponent
+        walks home. Stepping back onto a recently used square without getting
+        closer to goal is never real progress, so it is penalised.
+        """
+        if move[0] != "move" or (move[1], move[2]) not in recent:
+            return 0
+        me = state.turn
+        old = state.pawns[me]
+        state.pawns[me] = (move[1], move[2])
+        new_dist = pathfinding.distance(state, me)
+        state.pawns[me] = old
+        return REPEAT_PENALTY if new_dist >= my_dist else 0
+
     def _search_root(self, state, depth, previous_best):
         moves = self._moves(state)
+        recent = self._recent_squares(state) if self.avoid_repeats else set()
+        my_dist = pathfinding.distance(state, state.turn) if recent else None
         if previous_best in moves:      # iterative deepening: try last best first
             moves.remove(previous_best)
             moves.insert(0, previous_best)
@@ -149,6 +186,8 @@ class AlphaBetaAgent(Agent):
             state.apply(move)
             score = -self._negamax(state, depth - 1, -beta, -alpha)
             state.undo()
+            if recent and abs(score) < WIN_SCORE:
+                score -= self._repeat_penalty(state, move, recent, my_dist)
             if score > best_score:
                 best_score, best_move = score, move
             if self.pruning and score > alpha:
@@ -198,4 +237,5 @@ def make_agent(level, seed=None):
         return AlphaBetaAgent(depth=1, max_walls=4, mistake_rate=0.4, name="Easy AI", seed=seed)
     if level == "Medium":
         return AlphaBetaAgent(depth=2, max_walls=8, name="Medium AI", seed=seed)
-    return AlphaBetaAgent(depth=6, max_walls=12, time_limit=2.0, name="Hard AI", seed=seed)
+    return AlphaBetaAgent(depth=6, max_walls=12, time_limit=2.0, avoid_repeats=True,
+                          name="Hard AI", seed=seed)

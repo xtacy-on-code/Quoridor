@@ -1,7 +1,7 @@
 """How good is a position? The heuristic evaluation used at the search leaves.
 
 Quoridor is a race, so the key number is how many steps each player still
-needs, which we get from BFS. A position is good for me if my opponent's
+needs, which we get from A* (pathfinding.distance). A position is good for me if my opponent's
 route is long and mine is short. Walls left in hand are a resource too:
 they are future chances to slow the opponent down.
 

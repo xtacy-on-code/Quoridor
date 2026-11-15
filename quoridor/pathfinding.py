@@ -106,7 +106,13 @@ def distance(state, player):
 
 
 def shortest_path(state, player):
-    """List of cells from the pawn to its goal row (pawn cell included)."""
+    """List of cells from the pawn to its goal row (pawn cell included).
+
+    Still BFS on purpose: the AI's candidate walls are the walls that cut this
+    path, so switching it would change which walls get searched and with them
+    every benchmark and tournament number. distance() uses A*, which returns
+    the same lengths, so those numbers are unchanged.
+    """
     return bfs(state, player, return_path=True)[1]
 
 
