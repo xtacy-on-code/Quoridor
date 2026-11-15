@@ -3,7 +3,7 @@
 A Quoridor game you can play against an AI, or watch two AIs play each other.
 The AI uses **Alpha-Beta search** to look ahead and **A\* shortest paths** to judge positions.
 
-![Gameplay: Medium AI (Amber) vs Hard AI (Cyan), BFS paths shown](docs/gameplay.png)
+![Gameplay: Medium AI (Amber) vs Hard AI (Cyan), shortest paths shown](docs/gameplay.png)
 
 ## Team: Offic
 
@@ -51,7 +51,7 @@ Quoridor is played on a 9×9 board. Each player has a pawn and 10 walls.
 | Click a highlighted square | Move your pawn |
 | Hover a groove between squares, then click | Place a wall (preview in your colour = legal, red = illegal) |
 | Right click | Rotate the wall when hovering where two grooves cross |
-| `P` | Show / hide both players' BFS shortest paths |
+| `P` | Show / hide both players' shortest paths |
 | `U` | Undo your last move (and the AI's reply) |
 | `Space` | Pause / resume (AI vs AI) |
 | `R` / `Esc` | Restart / back to menu |
@@ -71,8 +71,8 @@ The goal is a whole row, so BFS stops at the first goal-row square it reaches.
 We then added **A\*** with `h = rows left to the goal`. That heuristic is admissible and
 consistent (each step changes the row by at most 1), so it finds the same shortest distance
 while expanding about **3× fewer squares** than BFS (about 2× faster per call).
-The AI and the rules now get every distance from A\*. BFS still draws the paths (`P`) and gives
-the opponent's path that wall pruning cuts (see below).
+The game, the rules and the AI now use A\* for every distance and path. BFS stays in the code only
+as the reference that A\* is tested and benchmarked against.
 
 The same distance check enforces the "never fully block a player" rule: a wall is legal only if
 both players still have a path after it is placed.
@@ -118,9 +118,9 @@ The AI runs on a background thread so the window never freezes while it thinks.
 Full write-up in [REPORT.md](REPORT.md). Run the experiments yourself with
 `python -m experiments.run_all`.
 
-The numbers below were measured before two later changes: distances from A\* instead of BFS,
-and Hard's repeat guard. A\* gives the same distances, so positions searched and scores are
-unchanged (we re-checked); only the times drop. The repeat guard changes Hard's play, so the
+The numbers below were measured before two later changes: A\* instead of BFS, and Hard's
+repeat guard. A\* gives the same distances and, on our 12 benchmark positions, the same paths, so
+positions searched and scores are unchanged (we re-checked); only the times drop. The repeat guard changes Hard's play, so the
 tournament has not been re-run with it yet (see REPORT.md, section 4).
 
 **Alpha-Beta vs Minimax** (same moves chosen, average over 12 mid-game positions):

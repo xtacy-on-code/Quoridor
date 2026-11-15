@@ -7,6 +7,9 @@ it never overestimates (each step changes the row by at most 1), so it is
 admissible and consistent and also returns the shortest path, but it
 expands fewer cells.
 
+The game and the AI use A* (distance, shortest_path, has_path). bfs() is kept
+as the reference that A* is benchmarked and tested against.
+
 The opponent's pawn is ignored here: it moves every turn and can be jumped,
 so it is not a lasting obstacle.
 """
@@ -106,14 +109,8 @@ def distance(state, player):
 
 
 def shortest_path(state, player):
-    """List of cells from the pawn to its goal row (pawn cell included).
-
-    Still BFS on purpose: the AI's candidate walls are the walls that cut this
-    path, so switching it would change which walls get searched and with them
-    every benchmark and tournament number. distance() uses A*, which returns
-    the same lengths, so those numbers are unchanged.
-    """
-    return bfs(state, player, return_path=True)[1]
+    """List of cells from the pawn to its goal row (pawn cell included)."""
+    return astar(state, player, return_path=True)[1]
 
 
 def has_path(state, player):

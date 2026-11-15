@@ -27,10 +27,10 @@ still have a path to their goal afterwards.
 
 On 12 mid-game positions, BFS expanded 30.2 squares on average and A\* expanded 10.3: about 3× fewer for the same answer.
 
-The AI and the legality check now take every distance from A\* (`pathfinding.distance`). BFS still
-returns the opponent's path used by wall pruning, so the set of walls searched is unchanged. We re-ran
-the search benchmark after the switch: positions searched and scores are identical at every depth,
-and only the time per move drops.
+The game, the legality check and the AI now use A\* for every distance and path; BFS stays only as
+the reference A\* is tested against. On our 12 benchmark positions A\* returns exactly the same paths as
+BFS, so the same walls are searched. We re-ran the search benchmark after the switch: positions
+searched and scores are identical at every depth, and only the time per move drops.
 
 ## 3. Evaluation function
 
@@ -84,7 +84,7 @@ Round-robin, 10 games per pair, swapping who moves first.
 | Agent | Random | Greedy | Easy | Medium | Hard | Overall |
 |---|---|---|---|---|---|---|
 | Random | – | 0/10 | 0/10 | 0/10 | 0/10 | 0% |
-| Greedy (follow BFS path) | 10/10 | – | 5/10 | 0/10 | 0/10 | 38% |
+| Greedy (follow shortest path) | 10/10 | – | 5/10 | 0/10 | 0/10 | 38% |
 | Easy | 10/10 | 5/10 | – | 0/10 | 0/10 | 38% |
 | Medium | 10/10 | 10/10 | 10/10 | – | 3/10 | 82% |
 | Hard | 10/10 | 10/10 | 10/10 | 7/10 | – | **92%** |
