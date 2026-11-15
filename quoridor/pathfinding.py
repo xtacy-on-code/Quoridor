@@ -102,7 +102,7 @@ def _rebuild(parent, cell):
 
 def distance(state, player):
     """Length of the shortest route to the goal row, or None if walled in."""
-    return bfs(state, player)[0]
+    return astar(state, player)[0]
 
 
 def shortest_path(state, player):
