@@ -5,7 +5,7 @@ Controls
 Click a highlighted cell       move your pawn
 Hover a groove, click          place a wall (preview shows if it is legal)
 Right click                    rotate the wall when hovering a groove crossing
-P                              show / hide both players' BFS shortest paths
+P                              show / hide both players' shortest paths
 U                              undo your last move (and the AI's reply)
 Space                          pause / resume (AI vs AI)
 R                              restart       Esc   back to menu
@@ -507,7 +507,7 @@ class App:
             ("Click cell", "move pawn"),
             ("Hover groove", "place wall"),
             ("Right click", "rotate wall at crossing"),
-            ("P", "show BFS paths" + ("  (on)" if self.show_paths else "")),
+            ("P", "show paths" + ("  (on)" if self.show_paths else "")),
             ("U", "undo"),
             ("Space", "pause AI vs AI"),
             ("R / Esc", "restart / menu"),

@@ -1,7 +1,7 @@
 """The AI players.
 
 RandomAgent     - plays any legal move (baseline)
-GreedyAgent     - always steps along its BFS shortest path, never places walls
+GreedyAgent     - always steps along its shortest path, never places walls
 MinimaxAgent    - full minimax to a fixed depth (no pruning)
 AlphaBetaAgent  - minimax with alpha-beta pruning, move ordering, wall pruning
                   and (optionally) iterative deepening under a time limit
