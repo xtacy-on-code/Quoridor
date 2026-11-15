@@ -27,6 +27,11 @@ still have a path to their goal afterwards.
 
 On 12 mid-game positions, BFS expanded 30.2 squares on average and A\* expanded 10.3: about 3× fewer for the same answer.
 
+The AI and the legality check now take every distance from A\* (`pathfinding.distance`). BFS still
+returns the opponent's path used by wall pruning, so the set of walls searched is unchanged. We re-ran
+the search benchmark after the switch: positions searched and scores are identical at every depth,
+and only the time per move drops.
+
 ## 3. Evaluation function
 
 ```
@@ -43,6 +48,12 @@ opponent. Wins score ±100,000, with a bonus for winning sooner.
   (any other wall leaves that path intact). This cuts the moves searched from **119.5 to ~10** per position.
 - **Move ordering:** moves that shorten my route or lengthen the opponent's are searched first, so cut-offs happen earlier.
 - **Iterative deepening (Hard):** search depth 1, 2, 3… until the time limit and play the deepest finished result.
+- **Repeat guard (Hard):** at the root, a pawn move back onto a square used in the last 4 moves gets a
+  100-point penalty unless it shortens the route. Without it, a deep search sees that the opponent's
+  walls in hand will punish any corridor it commits to, and "dodges" them by pacing back and forth:
+  the wall stays beyond the horizon while the opponent walks home (horizon effect). In our check,
+  Hard vs Medium went from 8/12 to 10/12 wins, and Hard vs Hard went from 2 of 4 games stuck at the
+  200-move limit to 0 of 4. These are small samples, and the tournament below was run before this fix.
 
 | Level | Search |
 |---|---|
@@ -109,6 +120,8 @@ So we kept weight 3.
 - Wall pruning misses "setup" walls whose value only shows a few moves later.
 - The evaluation ignores how fragile a route is (one corridor vs many alternatives).
 - There is no transposition table, so repeated positions get searched again.
+- The repeat guard treats the horizon effect's symptom (pacing). The evaluation still values the
+  opponent's walls in hand at only 3 points each, which is why pacing looked attractive.
 
 ## 7. Reproduce
 

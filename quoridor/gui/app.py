@@ -296,7 +296,7 @@ class App:
         cx = T.WIDTH // 2
         title = self.font_big.render("QUORIDOR", True, T.TEXT)
         s.blit(title, title.get_rect(center=(cx, 120)))
-        sub = self.font.render("Alpha-Beta search  +  BFS path evaluation", True, T.MUTED)
+        sub = self.font.render("Alpha-Beta search  +  A* path evaluation", True, T.MUTED)
         s.blit(sub, sub.get_rect(center=(cx, 170)))
         pygame.draw.circle(s, T.PLAYER_COLORS[0], (cx - 175, 121), 12)
         pygame.draw.circle(s, T.PLAYER_COLORS[1], (cx + 175, 121), 12)
@@ -468,7 +468,7 @@ class App:
             s.blit(img, (x + 44, y + 19))
 
             dist = pathfinding.distance(self.state, p)
-            img = self.font_small.render("Steps to goal (BFS)", True, T.MUTED)
+            img = self.font_small.render("Steps to goal (A*)", True, T.MUTED)
             s.blit(img, (x + 18, y + 55))
             img = self.font_mid.render(str(dist), True, T.TEXT)
             s.blit(img, (x + T.PANEL_W - 18 - img.get_width(), y + 50))
@@ -488,7 +488,7 @@ class App:
         d0 = pathfinding.distance(self.state, 0)
         d1 = pathfinding.distance(self.state, 1)
         adv = max(-8, min(8, d1 - d0))     # positive = Amber ahead
-        img = self.font_small.render("Race advantage (BFS steps)", True, T.MUTED)
+        img = self.font_small.render("Race advantage (A* steps)", True, T.MUTED)
         s.blit(img, (x, y))
         if d1 == d0:
             label, lcol = "even", T.TEXT
